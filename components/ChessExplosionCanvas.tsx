@@ -277,7 +277,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
         />
 
         {/* Narrative Overlays Container (Grid Stack to ensure beats occupy identical coordinate bounds) */}
-        <div className="relative z-20 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 grid grid-cols-1 grid-rows-1 items-center max-lg:items-end max-lg:pb-4 sm:max-lg:pb-8 pointer-events-none">
+        <div className="relative z-20 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 grid grid-cols-1 grid-rows-1 items-center max-lg:items-start max-lg:pt-[36vh] sm:max-lg:pt-[34vh] max-lg:pb-12 pointer-events-none">
           
           {/* BEAT A — 0-20% Scroll (Hero / Positioning) */}
           <motion.div
