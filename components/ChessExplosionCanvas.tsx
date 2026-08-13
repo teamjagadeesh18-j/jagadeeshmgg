@@ -269,35 +269,35 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
         {/* HTML5 Canvas */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none z-10"
+          className="absolute inset-0 max-lg:top-12 max-lg:bottom-auto max-lg:h-[42vh] w-full h-full object-contain pointer-events-none z-10"
         />
 
         {/* Narrative Overlays Container */}
-        <div className="relative z-20 w-full h-full max-w-7xl mx-auto px-5 sm:px-6 md:px-12 flex items-center pointer-events-none">
+        <div className="relative z-20 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center max-lg:items-end max-lg:pb-4 sm:max-lg:pb-8 pointer-events-none">
           
           {/* BEAT A — 0-20% Scroll (Hero / Positioning) */}
           <motion.div
             style={{ opacity: opacityA, y: yA, pointerEvents: pointerEventsA }}
-            className="w-full max-w-[640px] text-left flex flex-col items-start justify-center p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            className="w-full max-w-[640px] text-left flex flex-col items-start justify-center max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4 sm:mb-6 backdrop-blur-md">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2 sm:mb-4 backdrop-blur-md">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/70">
                 Strategic System Architecture
               </GradientShimmer>
             </div>
 
-            <h1 className="text-fluid-hero font-bold tracking-tighter leading-[1.02] mb-4 sm:mb-6 max-w-xl flex flex-col items-start">
-              <GradientShimmer gradient="sunrise" className="text-fluid-hero font-bold tracking-tighter leading-[1.02]">
+            <h1 className="text-xl sm:text-3xl lg:text-fluid-hero font-bold tracking-tighter leading-[1.02] mb-2 sm:mb-4 max-w-xl flex flex-col items-start">
+              <GradientShimmer gradient="sunrise" className="text-xl sm:text-3xl lg:text-fluid-hero font-bold tracking-tighter leading-[1.02]">
                 The Board Is Set.
               </GradientShimmer>
-              <GradientShimmer gradient="sunrise" className="text-fluid-hero font-bold tracking-tighter leading-[1.02]">
+              <GradientShimmer gradient="sunrise" className="text-xl sm:text-3xl lg:text-fluid-hero font-bold tracking-tighter leading-[1.02]">
                 Your Move.
               </GradientShimmer>
             </h1>
 
-            <p className="text-fluid-body text-white/70 font-normal max-w-lg leading-relaxed mb-6 sm:mb-8">
-              <GradientShimmer gradient="bubble" duration={2} className="text-fluid-body text-white/70 font-normal leading-relaxed">
+            <p className="text-xs sm:text-base text-white/70 font-normal max-w-lg leading-relaxed mb-4 sm:mb-6">
+              <GradientShimmer gradient="bubble" duration={2} className="text-xs sm:text-base text-white/70 font-normal leading-relaxed">
                 I build websites, AI agents, and CRMs for people who don&apos;t have time to lose. I don&apos;t sell effort. I sell the outcome that was already calculated before we spoke.
               </GradientShimmer>
             </p>
@@ -305,7 +305,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
             <div className="flex flex-wrap items-center gap-4 pointer-events-auto">
               <button
                 onClick={onOpenContact}
-                className="group relative inline-flex items-center space-x-2.5 px-6 py-3 sm:px-7 sm:py-3.5 rounded-full bg-white text-[#0A0A0A] font-semibold text-xs sm:text-sm tracking-tight hover:bg-white/90 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95"
+                className="group relative inline-flex items-center space-x-2.5 px-5 py-2.5 sm:px-7 sm:py-3.5 rounded-full bg-white text-[#0A0A0A] font-semibold text-xs sm:text-sm tracking-tight hover:bg-white/90 transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.2)] active:scale-95"
               >
                 <span>Start a Conversation</span>
                 <ArrowRight className="w-4 h-4 text-[#0A0A0A] group-hover:translate-x-1 transition-transform" />
@@ -316,48 +316,48 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT B — 25-45% Scroll (Services / The Pieces) */}
           <motion.div
             style={{ opacity: opacityB, y: yB, pointerEvents: pointerEventsB }}
-            className="w-full text-left flex flex-col max-w-[620px] p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            className="w-full text-left flex flex-col max-w-[620px] max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4 backdrop-blur-md self-start">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2 sm:mb-3 backdrop-blur-md self-start">
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/70">
                 01 / Capabilities
               </GradientShimmer>
             </div>
 
-            <h2 className="text-fluid-h2 font-bold tracking-tighter mb-3 sm:mb-4">
-              <GradientShimmer gradient="sunrise" className="text-fluid-h2 font-bold tracking-tighter">
+            <h2 className="text-lg sm:text-2xl lg:text-fluid-h2 font-bold tracking-tighter mb-2 sm:mb-3">
+              <GradientShimmer gradient="sunrise" className="text-lg sm:text-2xl lg:text-fluid-h2 font-bold tracking-tighter">
                 The Pieces.
               </GradientShimmer>
             </h2>
 
-            <p className="text-fluid-body text-white/70 mb-6 sm:mb-8 leading-relaxed max-w-lg">
-              <GradientShimmer gradient="bubble" duration={2} className="text-fluid-body text-white/70 leading-relaxed">
+            <p className="text-xs sm:text-base text-white/70 mb-3 sm:mb-5 leading-relaxed max-w-lg">
+              <GradientShimmer gradient="bubble" duration={2} className="text-xs sm:text-base text-white/70 leading-relaxed">
                 Websites built to convert and move. Autonomous AI agents for lead recovery and ops. Custom-structured CRMs built around how you actually work.
               </GradientShimmer>
             </p>
 
             {/* Interactive Feature Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 w-full">
-              <div className="p-3.5 sm:p-4 rounded-xl glass-panel hover:border-white/20 transition-all group">
-                <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-white/80 mb-1.5 sm:mb-2 group-hover:scale-110 transition-transform" />
-                <h3 className="text-xs sm:text-sm font-semibold text-white/90 mb-0.5 sm:mb-1">Websites</h3>
-                <p className="text-[11px] sm:text-xs text-white/50 leading-snug">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 w-full">
+              <div className="p-2.5 sm:p-4 rounded-xl glass-panel hover:border-white/20 transition-all group">
+                <Globe className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white/80 mb-1 sm:mb-2 group-hover:scale-110 transition-transform" />
+                <h3 className="text-xs sm:text-sm font-semibold text-white/90 mb-0.5">Websites</h3>
+                <p className="text-[10px] sm:text-xs text-white/50 leading-snug">
                   High-converting Next.js engines with motion mechanics.
                 </p>
               </div>
 
-              <div className="p-3.5 sm:p-4 rounded-xl glass-panel hover:border-white/20 transition-all group">
-                <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white/80 mb-1.5 sm:mb-2 group-hover:scale-110 transition-transform" />
-                <h3 className="text-xs sm:text-sm font-semibold text-white/90 mb-0.5 sm:mb-1">AI Agents</h3>
-                <p className="text-[11px] sm:text-xs text-white/50 leading-snug">
+              <div className="p-2.5 sm:p-4 rounded-xl glass-panel hover:border-white/20 transition-all group">
+                <Bot className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white/80 mb-1 sm:mb-2 group-hover:scale-110 transition-transform" />
+                <h3 className="text-xs sm:text-sm font-semibold text-white/90 mb-0.5">AI Agents</h3>
+                <p className="text-[10px] sm:text-xs text-white/50 leading-snug">
                   Autonomous workflow automation & 24/7 lead execution.
                 </p>
               </div>
 
-              <div className="p-3.5 sm:p-4 rounded-xl glass-panel hover:border-white/20 transition-all group">
-                <Database className="w-4 h-4 sm:w-5 sm:h-5 text-white/80 mb-1.5 sm:mb-2 group-hover:scale-110 transition-transform" />
-                <h3 className="text-xs sm:text-sm font-semibold text-white/90 mb-0.5 sm:mb-1">Custom CRMs</h3>
-                <p className="text-[11px] sm:text-xs text-white/50 leading-snug">
+              <div className="p-2.5 sm:p-4 rounded-xl glass-panel hover:border-white/20 transition-all group">
+                <Database className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white/80 mb-1 sm:mb-2 group-hover:scale-110 transition-transform" />
+                <h3 className="text-xs sm:text-sm font-semibold text-white/90 mb-0.5">Custom CRMs</h3>
+                <p className="text-[10px] sm:text-xs text-white/50 leading-snug">
                   Tailored pipeline infrastructure designed for rapid close.
                 </p>
               </div>
@@ -367,48 +367,48 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT C — 50-70% Scroll (Process / How the Game Is Played) */}
           <motion.div
             style={{ opacity: opacityC, y: yC, pointerEvents: pointerEventsC }}
-            className="w-full text-left lg:text-right lg:ml-auto flex flex-col items-start lg:items-end max-w-[620px] p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            className="w-full text-left lg:text-right lg:ml-auto flex flex-col items-start lg:items-end max-w-[620px] max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4 backdrop-blur-md">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2 sm:mb-3 backdrop-blur-md">
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/70">
                 02 / Delivery Method
               </GradientShimmer>
             </div>
 
-            <h2 className="text-fluid-h2 font-bold tracking-tighter mb-3 sm:mb-4">
-              <GradientShimmer gradient="sunrise" className="text-fluid-h2 font-bold tracking-tighter">
+            <h2 className="text-lg sm:text-2xl lg:text-fluid-h2 font-bold tracking-tighter mb-2 sm:mb-3">
+              <GradientShimmer gradient="sunrise" className="text-lg sm:text-2xl lg:text-fluid-h2 font-bold tracking-tighter">
                 Three Moves Ahead.
               </GradientShimmer>
             </h2>
 
-            <p className="text-fluid-body text-white/70 mb-6 sm:mb-8 leading-relaxed max-w-lg">
-              <GradientShimmer gradient="bubble" duration={2} className="text-fluid-body text-white/70 leading-relaxed">
+            <p className="text-xs sm:text-base text-white/70 mb-3 sm:mb-5 leading-relaxed max-w-lg">
+              <GradientShimmer gradient="bubble" duration={2} className="text-xs sm:text-base text-white/70 leading-relaxed">
                 The Position, The Calculation, The Execution, The Checkmate. Fast development because the thinking already happened.
               </GradientShimmer>
             </p>
 
             {/* 4-Stage Tactical Timeline */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 w-full text-left">
-              <div className="p-3.5 sm:p-4 rounded-xl glass-panel border border-white/10">
-                <div className="text-[10px] sm:text-xs font-mono text-white/40 mb-0.5">01. POSITION</div>
+              <div className="p-2.5 sm:p-4 rounded-xl glass-panel border border-white/10">
+                <div className="text-[9px] sm:text-xs font-mono text-white/40 mb-0.5">01. POSITION</div>
                 <div className="text-xs sm:text-sm font-semibold text-white/90">Audit & Scope</div>
                 <div className="text-[10px] sm:text-[11px] text-white/50 mt-0.5">Extract core leverage points</div>
               </div>
 
-              <div className="p-3.5 sm:p-4 rounded-xl glass-panel border border-white/10">
-                <div className="text-[10px] sm:text-xs font-mono text-white/40 mb-0.5">02. CALCULATION</div>
+              <div className="p-2.5 sm:p-4 rounded-xl glass-panel border border-white/10">
+                <div className="text-[9px] sm:text-xs font-mono text-white/40 mb-0.5">02. CALCULATION</div>
                 <div className="text-xs sm:text-sm font-semibold text-white/90">System Specs</div>
                 <div className="text-[10px] sm:text-[11px] text-white/50 mt-0.5">Zero-fluff architecture</div>
               </div>
 
-              <div className="p-3.5 sm:p-4 rounded-xl glass-panel border border-white/10">
-                <div className="text-[10px] sm:text-xs font-mono text-white/40 mb-0.5">03. EXECUTION</div>
+              <div className="p-2.5 sm:p-4 rounded-xl glass-panel border border-white/10">
+                <div className="text-[9px] sm:text-xs font-mono text-white/40 mb-0.5">03. EXECUTION</div>
                 <div className="text-xs sm:text-sm font-semibold text-white/90">Rapid Sprint</div>
                 <div className="text-[10px] sm:text-[11px] text-white/50 mt-0.5">Full code + AI deployment</div>
               </div>
 
-              <div className="p-3.5 sm:p-4 rounded-xl glass-panel border border-white/10">
-                <div className="text-[10px] sm:text-xs font-mono text-white/40 mb-0.5">04. CHECKMATE</div>
+              <div className="p-2.5 sm:p-4 rounded-xl glass-panel border border-white/10">
+                <div className="text-[9px] sm:text-xs font-mono text-white/40 mb-0.5">04. CHECKMATE</div>
                 <div className="text-xs sm:text-sm font-semibold text-white/90">Turnkey Hand-off</div>
                 <div className="text-[10px] sm:text-[11px] text-white/50 mt-0.5">Immediate market impact</div>
               </div>
@@ -418,7 +418,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT D — 75-95% Scroll (CTA / Contact) */}
           <motion.div
             style={{ opacity: opacityD, y: yD, pointerEvents: pointerEventsD }}
-            className="w-full text-center flex flex-col items-center justify-center max-w-[640px] mx-auto p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            className="w-full text-center flex flex-col items-center justify-center max-w-[640px] mx-auto max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4 sm:mb-6 backdrop-blur-md">
               <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
