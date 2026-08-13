@@ -1,5 +1,7 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import { getStoredEnquiries, saveStoredEnquiry, updateStoredEnquiryStatus, EnquiryItem } from "@/lib/enquiries-store";
 
 export async function GET() {
@@ -8,6 +10,7 @@ export async function GET() {
     let supabaseData: EnquiryItem[] = [];
 
     try {
+      const supabase = getSupabaseClient();
       const { data, error } = await supabase
         .from("enquiries")
         .select("*")
@@ -58,6 +61,7 @@ export async function PATCH(req: Request) {
 
     // Update in Supabase
     try {
+      const supabase = getSupabaseClient();
       await supabase.from("enquiries").update({ status }).eq("id", id);
     } catch (e) {
       console.warn("Supabase update status warning:", e);

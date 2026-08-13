@@ -277,7 +277,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     <label className="block text-[11px] font-mono text-white/60 uppercase tracking-widest mb-2">
                       Primary Objective <span className="text-amber-400">*</span>
                     </label>
-                    <div className="grid grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
                       {[
                         { id: "Website", label: "Website", icon: Globe },
                         { id: "AI Agent", label: "AI Agent", icon: Bot },
@@ -290,13 +290,13 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                             key={item.id}
                             type="button"
                             onClick={() => setSelectedFocus(item.id)}
-                            className={`flex flex-col items-center justify-center p-3 rounded-xl border text-xs font-mono transition-all ${
+                            className={`flex flex-col items-center justify-center p-2 sm:p-3 rounded-xl border text-[10px] sm:text-xs font-mono transition-all ${
                               active
                                 ? "bg-white text-black font-bold border-amber-400 shadow-[0_0_20px_rgba(255,255,255,0.4)] scale-[1.02]"
                                 : "bg-white/[0.03] border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
                             }`}
                           >
-                            <Icon className="w-4 h-4 mb-1.5" />
+                            <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 mb-1 sm:mb-1.5" />
                             <span>{item.label}</span>
                           </button>
                         );

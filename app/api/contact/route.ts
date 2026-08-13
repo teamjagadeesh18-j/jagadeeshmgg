@@ -1,14 +1,16 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { supabase } from "@/lib/supabase";
+import { getSupabaseClient } from "@/lib/supabase";
 import { saveStoredEnquiry } from "@/lib/enquiries-store";
 
-const resendApiKey = process.env.RESEND_API_KEY || "";
 const ownerEmail = process.env.OWNER_EMAIL || "teamjagadeesh18@gmail.com";
-const resend = new Resend(resendApiKey);
 
 export async function POST(req: Request) {
   try {
+    const resendApiKey = process.env.RESEND_API_KEY || "";
+    const resend = new Resend(resendApiKey);
     const body = await req.json();
     const { name, email, mobile, message, objective } = body;
 
@@ -52,6 +54,7 @@ export async function POST(req: Request) {
 
     // --- 1. Supabase Database Insert ---
     try {
+      const supabase = getSupabaseClient();
       const { error: dbError } = await supabase
         .from("enquiries")
         .insert([

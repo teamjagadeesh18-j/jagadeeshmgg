@@ -388,7 +388,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
             </p>
 
             {/* 4-Stage Tactical Timeline */}
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 w-full text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 w-full text-left">
               <div className="p-3.5 sm:p-4 rounded-xl glass-panel border border-white/10">
                 <div className="text-[10px] sm:text-xs font-mono text-white/40 mb-0.5">01. POSITION</div>
                 <div className="text-xs sm:text-sm font-semibold text-white/90">Audit & Scope</div>

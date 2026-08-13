@@ -67,7 +67,7 @@ export default function AboutSection({ onOpenContact }: AboutSectionProps) {
               </div>
 
               {/* Floating Badge on Photo */}
-              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 p-3.5 sm:p-4 rounded-xl glass-panel border border-white/15 backdrop-blur-xl flex items-center justify-between">
+              <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-6 sm:left-6 sm:right-6 p-2.5 sm:p-4 rounded-xl glass-panel border border-white/15 backdrop-blur-xl flex items-center justify-between">
                 <div>
                   <div className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-white">JAGADEESH</div>
                   <div className="text-[9px] sm:text-[10px] font-mono text-white/50">Founder & Principal Systems Architect</div>

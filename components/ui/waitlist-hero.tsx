@@ -344,7 +344,7 @@ export const WaitlistHero: React.FC<WaitlistHeroProps> = ({
                 value={email}
                 disabled={status === "loading"}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full h-[60px] pl-6 pr-[170px] sm:pr-[180px] rounded-full outline-none transition-all duration-200 placeholder-white/30 text-white text-xs sm:text-sm border border-white/10 focus:border-white/30"
+                className="w-full h-[60px] pl-4 sm:pl-6 pr-[135px] sm:pr-[180px] rounded-full outline-none transition-all duration-200 placeholder-white/30 text-white text-xs sm:text-sm border border-white/10 focus:border-white/30"
                 style={{
                   backgroundColor: colors.inputBg,
                 }}
@@ -354,7 +354,7 @@ export const WaitlistHero: React.FC<WaitlistHeroProps> = ({
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="h-full px-5 sm:px-6 rounded-full font-semibold text-xs sm:text-sm text-[#0A0A0A] bg-white hover:bg-white/90 transition-all active:scale-95 shadow-lg disabled:opacity-50 flex items-center justify-center space-x-1.5 min-w-[140px] sm:min-w-[160px]"
+                  className="h-full px-3 sm:px-6 rounded-full font-semibold text-xs sm:text-sm text-[#0A0A0A] bg-white hover:bg-white/90 transition-all active:scale-95 shadow-lg disabled:opacity-50 flex items-center justify-center space-x-1.5 min-w-[125px] sm:min-w-[160px]"
                 >
                   {status === "loading" ? (
                     <Loader2 className="w-4 h-4 animate-spin text-[#0A0A0A]" />
