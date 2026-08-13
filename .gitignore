@@ -1,0 +1,25 @@
+# dependencies
+/node_modules
+/.pnpm
+/.yarn
+
+# next.js build output
+/.next/
+/out/
+
+# local env files
+.env*.local
+.env
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# raw frame source folders (processed webps are in public/)
+/webtest/
+/jil/
+/aboutme .jpeg
+
+# OS metadata
+.DS_Store
+Thumbs.db
