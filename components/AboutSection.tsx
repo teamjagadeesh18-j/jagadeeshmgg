@@ -135,7 +135,7 @@ export default function AboutSection({ onOpenContact }: AboutSectionProps) {
         </div>
 
         {/* Stats Block with Animated Numbers */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
           {stats.map((stat, idx) => {
             const Icon = stat.icon;
             return (
@@ -145,7 +145,7 @@ export default function AboutSection({ onOpenContact }: AboutSectionProps) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="p-4 sm:p-6 md:p-8 rounded-2xl glass-panel border border-white/10 hover:border-white/20 transition-all duration-300 group"
+                className="p-3.5 sm:p-6 md:p-8 rounded-2xl glass-panel border border-white/10 hover:border-white/20 transition-all duration-300 group"
               >
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <span className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tighter text-gradient group-hover:text-amber-400 transition-colors inline-flex items-center">

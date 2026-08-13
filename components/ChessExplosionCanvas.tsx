@@ -278,7 +278,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT A — 0-20% Scroll (Hero / Positioning) */}
           <motion.div
             style={{ opacity: opacityA, y: yA, pointerEvents: pointerEventsA }}
-            className="w-full max-w-[640px] text-left flex flex-col items-start justify-center"
+            className="w-full max-w-[640px] text-left flex flex-col items-start justify-center p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4 sm:mb-6 backdrop-blur-md">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -316,7 +316,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT B — 25-45% Scroll (Services / The Pieces) */}
           <motion.div
             style={{ opacity: opacityB, y: yB, pointerEvents: pointerEventsB }}
-            className="w-full text-left flex flex-col max-w-[620px]"
+            className="w-full text-left flex flex-col max-w-[620px] p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4 backdrop-blur-md self-start">
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/70">
@@ -367,7 +367,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT C — 50-70% Scroll (Process / How the Game Is Played) */}
           <motion.div
             style={{ opacity: opacityC, y: yC, pointerEvents: pointerEventsC }}
-            className="w-full text-left lg:text-right lg:ml-auto flex flex-col items-start lg:items-end max-w-[620px]"
+            className="w-full text-left lg:text-right lg:ml-auto flex flex-col items-start lg:items-end max-w-[620px] p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-4 backdrop-blur-md">
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/70">
@@ -418,7 +418,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT D — 75-95% Scroll (CTA / Contact) */}
           <motion.div
             style={{ opacity: opacityD, y: yD, pointerEvents: pointerEventsD }}
-            className="w-full text-center flex flex-col items-center justify-center max-w-[640px] mx-auto"
+            className="w-full text-center flex flex-col items-center justify-center max-w-[640px] mx-auto p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4 sm:mb-6 backdrop-blur-md">
               <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />

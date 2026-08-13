@@ -9,7 +9,10 @@ const ownerEmail = process.env.OWNER_EMAIL || "teamjagadeesh18@gmail.com";
 
 export async function POST(req: Request) {
   try {
-    const resendApiKey = process.env.RESEND_API_KEY || "";
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      throw new Error("Missing RESEND_API_KEY env var");
+    }
     const resend = new Resend(resendApiKey);
     const body = await req.json();
     const { name, email, mobile, message, objective } = body;

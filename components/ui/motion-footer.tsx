@@ -315,7 +315,7 @@ export function CinematicFooter({ onOpenContact }: CinematicFooterProps) {
           </div>
 
           {/* 1. Sleek Marquee (Top of footer) */}
-          <div className="absolute top-12 left-0 w-full overflow-hidden border-y border-white/10 bg-[#0A0A0A]/70 backdrop-blur-md py-4 z-10 -rotate-1 scale-105 shadow-2xl">
+          <div className="absolute top-4 sm:top-12 left-0 w-full overflow-hidden border-y border-white/10 bg-[#0A0A0A]/70 backdrop-blur-md py-2.5 sm:py-4 z-10 -rotate-1 scale-105 shadow-2xl">
             <div className="flex w-max animate-footer-scroll-marquee text-xs md:text-sm font-bold tracking-[0.3em] text-white/70 uppercase">
               <MarqueeItem />
               <MarqueeItem />
@@ -323,7 +323,7 @@ export function CinematicFooter({ onOpenContact }: CinematicFooterProps) {
           </div>
 
           {/* 2. Main Center Content */}
-          <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-5 sm:px-6 md:px-12 mt-12 sm:mt-16 w-full max-w-5xl mx-auto">
+          <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-5 sm:px-6 md:px-12 mt-14 sm:mt-16 w-full max-w-5xl mx-auto">
             <h2
               ref={headingRef}
               className="text-fluid-hero font-black footer-text-glow tracking-tighter mb-8 sm:mb-10 text-center max-w-4xl"
