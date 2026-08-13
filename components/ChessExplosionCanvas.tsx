@@ -221,21 +221,25 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
   const opacityA = useTransform(smoothProgress, [0.0, 0.17, 0.22], [1, 1, 0]);
   const yA = useTransform(smoothProgress, [0.0, 0.17, 0.22], [0, 0, -20]);
   const pointerEventsA = useTransform(smoothProgress, (v) => (v < 0.22 ? "auto" : "none"));
+  const visibilityA = useTransform(smoothProgress, (v) => (v <= 0.23 ? "visible" : "hidden"));
 
   // Beat B: 0.25 -> 0.45
   const opacityB = useTransform(smoothProgress, [0.25, 0.28, 0.42, 0.46], [0, 1, 1, 0]);
   const yB = useTransform(smoothProgress, [0.25, 0.28, 0.42, 0.46], [20, 0, 0, -20]);
   const pointerEventsB = useTransform(smoothProgress, (v) => (v >= 0.24 && v <= 0.46 ? "auto" : "none"));
+  const visibilityB = useTransform(smoothProgress, (v) => (v >= 0.23 && v <= 0.47 ? "visible" : "hidden"));
 
   // Beat C: 0.50 -> 0.70
   const opacityC = useTransform(smoothProgress, [0.50, 0.53, 0.67, 0.71], [0, 1, 1, 0]);
   const yC = useTransform(smoothProgress, [0.50, 0.53, 0.67, 0.71], [20, 0, 0, -20]);
   const pointerEventsC = useTransform(smoothProgress, (v) => (v >= 0.49 && v <= 0.71 ? "auto" : "none"));
+  const visibilityC = useTransform(smoothProgress, (v) => (v >= 0.48 && v <= 0.73 ? "visible" : "hidden"));
 
   // Beat D: 0.75 -> 0.95
   const opacityD = useTransform(smoothProgress, [0.75, 0.78, 0.92, 0.96], [0, 1, 1, 0]);
   const yD = useTransform(smoothProgress, [0.75, 0.78, 0.92, 0.96], [20, 0, 0, -20]);
   const pointerEventsD = useTransform(smoothProgress, (v) => (v >= 0.74 ? "auto" : "none"));
+  const visibilityD = useTransform(smoothProgress, (v) => (v >= 0.73 ? "visible" : "hidden"));
 
   // Scroll indicator opacity: 0% -> 10%
   const scrollIndicatorOpacity = useTransform(smoothProgress, [0, 0.08], [1, 0]);
@@ -272,13 +276,13 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           className="absolute inset-0 max-lg:top-12 max-lg:bottom-auto max-lg:h-[42vh] w-full h-full object-contain pointer-events-none z-10"
         />
 
-        {/* Narrative Overlays Container */}
-        <div className="relative z-20 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 flex items-center max-lg:items-end max-lg:pb-4 sm:max-lg:pb-8 pointer-events-none">
+        {/* Narrative Overlays Container (Grid Stack to ensure beats occupy identical coordinate bounds) */}
+        <div className="relative z-20 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 grid grid-cols-1 grid-rows-1 items-center max-lg:items-end max-lg:pb-4 sm:max-lg:pb-8 pointer-events-none">
           
           {/* BEAT A — 0-20% Scroll (Hero / Positioning) */}
           <motion.div
-            style={{ opacity: opacityA, y: yA, pointerEvents: pointerEventsA }}
-            className="w-full max-w-[640px] text-left flex flex-col items-start justify-center max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            style={{ opacity: opacityA, y: yA, pointerEvents: pointerEventsA, visibility: visibilityA }}
+            className="col-start-1 row-start-1 w-full max-w-[640px] text-left flex flex-col items-start justify-center max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2 sm:mb-4 backdrop-blur-md">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -288,10 +292,10 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
             </div>
 
             <h1 className="text-xl sm:text-3xl lg:text-fluid-hero font-bold tracking-tighter leading-[1.02] mb-2 sm:mb-4 max-w-xl flex flex-col items-start">
-              <GradientShimmer gradient="sunrise" className="text-xl sm:text-3xl lg:text-fluid-hero font-bold tracking-tighter leading-[1.02]">
+              <GradientShimmer gradient="sunrise" className="text-xl sm:text-3xl lg:text-fluid-hero font-bold tracking-tighter">
                 The Board Is Set.
               </GradientShimmer>
-              <GradientShimmer gradient="sunrise" className="text-xl sm:text-3xl lg:text-fluid-hero font-bold tracking-tighter leading-[1.02]">
+              <GradientShimmer gradient="sunrise" className="text-xl sm:text-3xl lg:text-fluid-hero font-bold tracking-tighter">
                 Your Move.
               </GradientShimmer>
             </h1>
@@ -315,8 +319,8 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
 
           {/* BEAT B — 25-45% Scroll (Services / The Pieces) */}
           <motion.div
-            style={{ opacity: opacityB, y: yB, pointerEvents: pointerEventsB }}
-            className="w-full text-left flex flex-col max-w-[620px] max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            style={{ opacity: opacityB, y: yB, pointerEvents: pointerEventsB, visibility: visibilityB }}
+            className="col-start-1 row-start-1 w-full text-left flex flex-col max-w-[620px] max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2 sm:mb-3 backdrop-blur-md self-start">
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/70">
@@ -366,8 +370,8 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
 
           {/* BEAT C — 50-70% Scroll (Process / How the Game Is Played) */}
           <motion.div
-            style={{ opacity: opacityC, y: yC, pointerEvents: pointerEventsC }}
-            className="w-full text-left lg:text-right lg:ml-auto flex flex-col items-start lg:items-end max-w-[620px] max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            style={{ opacity: opacityC, y: yC, pointerEvents: pointerEventsC, visibility: visibilityC }}
+            className="col-start-1 row-start-1 w-full text-left lg:text-right lg:justify-self-end flex flex-col items-start lg:items-end max-w-[620px] max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2 sm:mb-3 backdrop-blur-md">
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/70">
@@ -417,11 +421,11 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
 
           {/* BEAT D — 75-95% Scroll (CTA / Contact) */}
           <motion.div
-            style={{ opacity: opacityD, y: yD, pointerEvents: pointerEventsD }}
-            className="w-full text-center flex flex-col items-center justify-center max-w-[640px] mx-auto max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            style={{ opacity: opacityD, y: yD, pointerEvents: pointerEventsD, visibility: visibilityD }}
+            className="col-start-1 row-start-1 w-full text-center lg:justify-self-center flex flex-col items-center justify-center max-w-[640px] mx-auto max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4 sm:mb-6 backdrop-blur-md">
-              <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
+              <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/80">
                 Turnkey Execution Available
               </GradientShimmer>

@@ -304,27 +304,31 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
   const opacity1 = useTransform(smoothProgress, [0.0, 0.04, 0.21, 0.25], [0, 1, 1, 0]);
   const y1 = useTransform(smoothProgress, [0.0, 0.04, 0.21, 0.25], [20, 0, 0, -20]);
   const pointerEvents1 = useTransform(smoothProgress, (v) => (v <= 0.25 ? "auto" : "none"));
+  const visibility1 = useTransform(smoothProgress, (v) => (v <= 0.26 ? "visible" : "hidden"));
 
   // Beat 2: 0.25 -> 0.50 (PULSE)
   const opacity2 = useTransform(smoothProgress, [0.25, 0.29, 0.46, 0.50], [0, 1, 1, 0]);
   const y2 = useTransform(smoothProgress, [0.25, 0.29, 0.46, 0.50], [20, 0, 0, -20]);
   const pointerEvents2 = useTransform(smoothProgress, (v) => (v >= 0.24 && v <= 0.50 ? "auto" : "none"));
+  const visibility2 = useTransform(smoothProgress, (v) => (v >= 0.24 && v <= 0.51 ? "visible" : "hidden"));
 
   // Beat 3: 0.50 -> 0.75 (CAMPUS)
   const opacity3 = useTransform(smoothProgress, [0.50, 0.54, 0.71, 0.75], [0, 1, 1, 0]);
   const y3 = useTransform(smoothProgress, [0.50, 0.54, 0.71, 0.75], [20, 0, 0, -20]);
   const pointerEvents3 = useTransform(smoothProgress, (v) => (v >= 0.49 && v <= 0.75 ? "auto" : "none"));
+  const visibility3 = useTransform(smoothProgress, (v) => (v >= 0.49 && v <= 0.76 ? "visible" : "hidden"));
 
   // Beat 4: 0.75 -> 1.00 (VERTEX)
   const opacity4 = useTransform(smoothProgress, [0.75, 0.79, 0.96, 1.00], [0, 1, 1, 0]);
   const y4 = useTransform(smoothProgress, [0.75, 0.79, 0.96, 1.00], [20, 0, 0, -20]);
   const pointerEvents4 = useTransform(smoothProgress, (v) => (v >= 0.74 ? "auto" : "none"));
+  const visibility4 = useTransform(smoothProgress, (v) => (v >= 0.74 ? "visible" : "hidden"));
 
   const opacityTransforms = [
-    { opacity: opacity1, y: y1, pointerEvents: pointerEvents1 },
-    { opacity: opacity2, y: y2, pointerEvents: pointerEvents2 },
-    { opacity: opacity3, y: y3, pointerEvents: pointerEvents3 },
-    { opacity: opacity4, y: y4, pointerEvents: pointerEvents4 },
+    { opacity: opacity1, y: y1, pointerEvents: pointerEvents1, visibility: visibility1 },
+    { opacity: opacity2, y: y2, pointerEvents: pointerEvents2, visibility: visibility2 },
+    { opacity: opacity3, y: y3, pointerEvents: pointerEvents3, visibility: visibility3 },
+    { opacity: opacity4, y: y4, pointerEvents: pointerEvents4, visibility: visibility4 },
   ];
 
   return (
@@ -368,6 +372,7 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
                     opacity: transform.opacity,
                     y: transform.y,
                     pointerEvents: transform.pointerEvents as any,
+                    visibility: transform.visibility as any,
                   }}
                   className="absolute inset-0 flex flex-col justify-center max-w-[580px]"
                 >
