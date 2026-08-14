@@ -21,6 +21,8 @@ export default function Navbar({ onOpenContact }: NavbarProps) {
         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/5 border border-white/20 backdrop-blur-md flex items-center justify-center text-white/90 shadow-xl group hover:border-amber-400/50 transition-all shrink-0 overflow-hidden p-0.5">
           <img
             src="/logo.jpeg"
+            srcSet="/logo-mobile.webp 640w, /logo-tablet.webp 1024w, /logo.jpeg 1920w"
+            sizes="(max-width: 640px) 640px, (max-width: 1024px) 1024px, 100vw"
             alt="Jagadeesh Logo"
             className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-300"
           />

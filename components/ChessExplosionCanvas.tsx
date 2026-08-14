@@ -62,6 +62,8 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
     const loadFrame = (i: number) => {
       if (i >= framesCount || !mounted) return;
       const img = new Image();
+      img.srcset = `${folder}/frame_${i}-mobile.webp 640w, ${folder}/frame_${i}-tablet.webp 1024w, ${folder}/frame_${i}.webp 1920w`;
+      img.sizes = "(max-width: 640px) 640px, (max-width: 1024px) 1024px, 100vw";
       img.src = `${folder}/frame_${i}.webp`;
 
       img.onload = () => {
