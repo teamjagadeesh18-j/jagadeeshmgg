@@ -14,13 +14,17 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
+  // High-performance image storage & dirty-checking refs
+  const imagesRef = useRef<(HTMLImageElement | null)[]>([]);
+  const lastRenderedIndexRef = useRef<number | null>(null);
+  const lastCanvasSizeRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
+
   // State for preloading
-  const [images, setImages] = useState<(HTMLImageElement | null)[]>([]);
   const [loadProgress, setLoadProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const INITIAL_PRELOAD = 15;
+  const INITIAL_BATCH = 20;
 
   // Scroll Progress logic
   const { scrollYProgress } = useScroll({
@@ -45,16 +49,18 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
     return () => window.removeEventListener("resize", checkDevice);
   }, []);
 
-  // Staged Preload sequence: Preload initial 15 frames for rapid LCP, then stream remaining frames continuously
+  // Staged Preload sequence: Rapid initial batch for fast LCP, then idle-stream remaining frames without re-render thrashing
   useEffect(() => {
     let mounted = true;
-    const framesCount = isMobile ? 120 : 240;
-    const folder = isMobile ? "/sequence-mobile" : "/sequence";
+    const framesCount = 240;
+    const folder = "/sequence";
     const loadedImages: (HTMLImageElement | null)[] = new Array(framesCount).fill(null);
+    imagesRef.current = loadedImages;
 
     let loadedCount = 0;
 
-    for (let i = 0; i < framesCount; i++) {
+    const loadFrame = (i: number) => {
+      if (i >= framesCount || !mounted) return;
       const img = new Image();
       img.src = `${folder}/frame_${i}.webp`;
 
@@ -64,8 +70,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
         loadedCount++;
         setLoadProgress(Math.floor((loadedCount / framesCount) * 100));
 
-        if (loadedCount % 5 === 0 || loadedCount === framesCount || loadedCount >= INITIAL_PRELOAD) {
-          setImages([...loadedImages]);
+        if (loadedCount >= INITIAL_BATCH && !isLoaded) {
           setIsLoaded(true);
         }
       };
@@ -74,17 +79,47 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
         if (!mounted) return;
         loadedCount++;
         setLoadProgress(Math.floor((loadedCount / framesCount) * 100));
-        if (loadedCount === framesCount || loadedCount >= INITIAL_PRELOAD) {
-          setImages([...loadedImages]);
+        if (loadedCount >= INITIAL_BATCH && !isLoaded) {
           setIsLoaded(true);
         }
       };
+    };
+
+    // 1. Rapid load initial batch for instant page interactive
+    for (let i = 0; i < INITIAL_BATCH; i++) {
+      loadFrame(i);
+    }
+
+    // 2. Stream remaining frames asynchronously in non-blocking batches
+    let currentBatch = INITIAL_BATCH;
+    const BATCH_SIZE = 12;
+
+    const streamRemaining = () => {
+      if (!mounted || currentBatch >= framesCount) return;
+      const end = Math.min(currentBatch + BATCH_SIZE, framesCount);
+      for (let i = currentBatch; i < end; i++) {
+        loadFrame(i);
+      }
+      currentBatch = end;
+      if (currentBatch < framesCount) {
+        if (typeof window.requestIdleCallback === "function") {
+          window.requestIdleCallback(streamRemaining, { timeout: 100 });
+        } else {
+          setTimeout(streamRemaining, 25);
+        }
+      }
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(streamRemaining, { timeout: 100 });
+    } else {
+      setTimeout(streamRemaining, 40);
     }
 
     return () => {
       mounted = false;
     };
-  }, [isMobile]);
+  }, []);
 
   // Fluid ResizeObserver to continuously update Canvas Resolution & Fit Bounds on window/foldable resize
   useEffect(() => {
@@ -117,17 +152,20 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
     };
   }, []);
 
-  // Draw frame on canvas upon smoothProgress change
+  // Optimized Canvas render loop with dirty checking & gradient caching
   useEffect(() => {
-    if (!isLoaded || images.length === 0) return;
+    if (!isLoaded) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
     let animationFrameId: number;
-    const totalFramesCount = isMobile ? 120 : 240;
+    const totalFramesCount = 240;
+    let cachedRadialGradient: CanvasGradient | null = null;
+    let cachedGradW = 0;
+    let cachedGradH = 0;
 
     const render = () => {
       const currentProgress = smoothProgress.get();
@@ -136,7 +174,21 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
         Math.max(0, Math.floor(currentProgress * totalFramesCount))
       );
 
-      // Graceful fallback to nearest available loaded frame
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+
+      const sizeChanged =
+        lastCanvasSizeRef.current.w !== width ||
+        lastCanvasSizeRef.current.h !== height;
+
+      // DIRTY CHECKING: Skip redraw if frame index and canvas dimensions haven't changed!
+      if (!sizeChanged && lastRenderedIndexRef.current === targetIndex) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
+
+      const images = imagesRef.current;
       let img = images[targetIndex];
       if (!img) {
         for (let offset = 1; offset < totalFramesCount; offset++) {
@@ -151,29 +203,42 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
         }
       }
 
-      if (img && img.complete && img.naturalWidth > 0) {
-        const dpr = window.devicePixelRatio || 1;
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
+      if (img && img.complete && img.naturalWidth > 0 && width > 0 && height > 0) {
+        if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+        }
 
-        if (width > 0 && height > 0) {
-          if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
+        ctx.save();
+        ctx.scale(dpr, dpr);
+        ctx.fillStyle = "#0A0A0A";
+        ctx.fillRect(0, 0, width, height);
+
+        const imgRatio = img.naturalWidth / img.naturalHeight;
+        const canvasRatio = width / height;
+
+        let drawWidth: number;
+        let drawHeight: number;
+        let drawX: number;
+        let drawY: number;
+
+        if (isMobile) {
+          // Mobile (< 768px): Cover mode with center 30% vertical offset
+          if (canvasRatio > imgRatio) {
+            drawWidth = width;
+            drawHeight = width / imgRatio;
+            drawX = 0;
+            drawY = (height - drawHeight) * 0.30;
+          } else {
+            drawHeight = height;
+            drawWidth = height * imgRatio;
+            drawX = (width - drawWidth) * 0.50;
+            drawY = (height - drawHeight) * 0.30;
           }
 
-          ctx.save();
-          ctx.scale(dpr, dpr);
-          ctx.fillStyle = "#0A0A0A";
-          ctx.fillRect(0, 0, width, height);
-
-          // Aspect ratio contain scaling
-          const imgRatio = img.naturalWidth / img.naturalHeight;
-          const canvasRatio = width / height;
-
-          let drawWidth: number;
-          let drawHeight: number;
-
+          ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        } else {
+          // Desktop/Tablet (>= 768px): Boxed contain scaling
           if (canvasRatio > imgRatio) {
             drawHeight = height;
             drawWidth = height * imgRatio;
@@ -182,28 +247,36 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
             drawHeight = width / imgRatio;
           }
 
-          const drawX = (width - drawWidth) / 2;
-          const drawY = (height - drawHeight) / 2;
+          drawX = (width - drawWidth) / 2;
+          drawY = (height - drawHeight) / 2;
 
-          // Draw current image frame
           ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
-          // Radial edge blending overlay
-          const radialGradient = ctx.createRadialGradient(
-            width / 2,
-            height / 2,
-            Math.min(drawWidth, drawHeight) * 0.35,
-            width / 2,
-            height / 2,
-            Math.max(width, height) * 0.55
-          );
-          radialGradient.addColorStop(0, "rgba(10, 10, 10, 0)");
-          radialGradient.addColorStop(1, "#0A0A0A");
-          ctx.fillStyle = radialGradient;
-          ctx.fillRect(0, 0, width, height);
+          // Cache radial gradient to prevent GC pauses
+          if (!cachedRadialGradient || cachedGradW !== width || cachedGradH !== height) {
+            cachedRadialGradient = ctx.createRadialGradient(
+              width / 2,
+              height / 2,
+              Math.min(drawWidth, drawHeight) * 0.35,
+              width / 2,
+              height / 2,
+              Math.max(width, height) * 0.55
+            );
+            cachedRadialGradient.addColorStop(0, "rgba(10, 10, 10, 0)");
+            cachedRadialGradient.addColorStop(1, "#0A0A0A");
+            cachedGradW = width;
+            cachedGradH = height;
+          }
 
-          ctx.restore();
+          ctx.fillStyle = cachedRadialGradient;
+          ctx.fillRect(0, 0, width, height);
         }
+
+        ctx.restore();
+
+        // Save last rendered state
+        lastRenderedIndexRef.current = targetIndex;
+        lastCanvasSizeRef.current = { w: width, h: height };
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -214,7 +287,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isLoaded, images, smoothProgress, isMobile]);
+  }, [isLoaded, smoothProgress, isMobile]);
 
   // Framer Motion transforms for narrative text overlays
   // BEAT A: Visible on load (0.0), stays until 0.17, fades out at 0.22
@@ -256,7 +329,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
               <span className="text-[11px] font-mono text-white/80">{loadProgress}%</span>
             </div>
             <p className="text-xs text-white/50 font-mono mb-4">
-              Initializing Engine ({isMobile ? "120 Mobile Frames" : "240 Desktop Frames"})...
+              Initializing Engine (240 Frames)...
             </p>
             <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
               <div
@@ -270,19 +343,30 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
 
       {/* Sticky Viewport Container */}
       <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#0A0A0A]">
-        {/* HTML5 Canvas */}
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 max-lg:top-12 max-lg:bottom-auto max-lg:h-[42vh] w-full h-full object-contain pointer-events-none z-10"
+        {/* Mobile Scale Animation Background Layer */}
+        <div className="absolute inset-0 w-full h-full max-md:animate-hero-cinematic-zoom overflow-hidden pointer-events-none z-10">
+          {/* HTML5 Canvas */}
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full max-md:object-cover max-md:object-[center_30%] md:object-contain pointer-events-none"
+          />
+        </div>
+
+        {/* Gradient Scrim behind text region on mobile (< 768px) */}
+        <div
+          className="md:hidden absolute inset-0 pointer-events-none z-15"
+          style={{
+            background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 70%)"
+          }}
         />
 
         {/* Narrative Overlays Container (Grid Stack to ensure beats occupy identical coordinate bounds) */}
-        <div className="relative z-20 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 grid grid-cols-1 grid-rows-1 items-center max-lg:items-start max-lg:pt-[36vh] sm:max-lg:pt-[34vh] max-lg:pb-12 pointer-events-none">
+        <div className="relative z-20 w-full h-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 grid grid-cols-1 grid-rows-1 items-center max-md:items-end max-md:pb-16 max-md:pt-0 max-md:px-5 pointer-events-none">
           
           {/* BEAT A — 0-20% Scroll (Hero / Positioning) */}
           <motion.div
             style={{ opacity: opacityA, y: yA, pointerEvents: pointerEventsA, visibility: visibilityA }}
-            className="col-start-1 row-start-1 w-full max-w-[640px] text-left flex flex-col items-start justify-center max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            className="col-start-1 row-start-1 w-full max-w-[640px] text-left flex flex-col items-start justify-center max-md:p-0 max-md:bg-transparent max-md:backdrop-blur-none max-md:border-none max-md:shadow-none p-4 sm:p-6 md:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 md:bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl md:backdrop-blur-xl lg:backdrop-blur-none border border-white/10 md:border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2 sm:mb-4 backdrop-blur-md">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -320,7 +404,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT B — 25-45% Scroll (Services / The Pieces) */}
           <motion.div
             style={{ opacity: opacityB, y: yB, pointerEvents: pointerEventsB, visibility: visibilityB }}
-            className="col-start-1 row-start-1 w-full text-left flex flex-col max-w-[620px] max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            className="col-start-1 row-start-1 w-full text-left flex flex-col max-w-[620px] max-md:p-0 max-md:bg-transparent max-md:backdrop-blur-none max-md:border-none max-md:shadow-none p-4 sm:p-6 md:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 md:bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl md:backdrop-blur-xl lg:backdrop-blur-none border border-white/10 md:border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2 sm:mb-3 backdrop-blur-md self-start">
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/70">
@@ -371,7 +455,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT C — 50-70% Scroll (Process / How the Game Is Played) */}
           <motion.div
             style={{ opacity: opacityC, y: yC, pointerEvents: pointerEventsC, visibility: visibilityC }}
-            className="col-start-1 row-start-1 w-full text-left lg:text-right lg:justify-self-end flex flex-col items-start lg:items-end max-w-[620px] max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            className="col-start-1 row-start-1 w-full text-left lg:text-right lg:justify-self-end flex flex-col items-start lg:items-end max-w-[620px] max-md:p-0 max-md:bg-transparent max-md:backdrop-blur-none max-md:border-none max-md:shadow-none p-4 sm:p-6 md:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 md:bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl md:backdrop-blur-xl lg:backdrop-blur-none border border-white/10 md:border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-2 sm:mb-3 backdrop-blur-md">
               <GradientShimmer gradient="sunrise" className="text-[10px] sm:text-[11px] font-mono uppercase tracking-widest text-white/70">
@@ -422,7 +506,7 @@ export default function ChessExplosionCanvas({ onOpenContact }: ChessExplosionCa
           {/* BEAT D — 75-95% Scroll (CTA / Contact) */}
           <motion.div
             style={{ opacity: opacityD, y: yD, pointerEvents: pointerEventsD, visibility: visibilityD }}
-            className="col-start-1 row-start-1 w-full text-center lg:justify-self-center flex flex-col items-center justify-center max-w-[640px] mx-auto max-lg:p-0 max-lg:bg-transparent max-lg:backdrop-blur-none max-lg:border-none max-lg:shadow-none p-4 sm:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl lg:backdrop-blur-none border border-white/10 lg:border-none shadow-2xl lg:shadow-none"
+            className="col-start-1 row-start-1 w-full text-center lg:justify-self-center flex flex-col items-center justify-center max-w-[640px] mx-auto max-md:p-0 max-md:bg-transparent max-md:backdrop-blur-none max-md:border-none max-md:shadow-none p-4 sm:p-6 md:p-6 lg:p-0 rounded-2xl sm:rounded-3xl bg-[#0A0A0A]/75 md:bg-[#0A0A0A]/75 lg:bg-transparent backdrop-blur-xl md:backdrop-blur-xl lg:backdrop-blur-none border border-white/10 md:border-white/10 lg:border-none shadow-2xl lg:shadow-none"
           >
             <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4 sm:mb-6 backdrop-blur-md">
               <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400 shrink-0" />

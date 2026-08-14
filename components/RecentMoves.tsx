@@ -82,10 +82,16 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [images, setImages] = useState<(HTMLImageElement | null)[]>([]);
+  // High-performance refs for zero re-renders and dirty-checked rendering
+  const imagesRef = useRef<(HTMLImageElement | null)[]>([]);
+  const lastRenderedIndexRef = useRef<number | null>(null);
+  const lastCanvasSizeRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInProximity, setIsInProximity] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const INITIAL_BATCH = 15;
 
   // Detect Mobile device & viewport
   useEffect(() => {
@@ -128,7 +134,7 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
     restDelta: 0.0001,
   });
 
-  // Preload ALL 240 (120 mobile) JIL sequence frames across entire 0..TOTAL_FRAMES sequence
+  // Preload JIL sequence frames smoothly without blocking main thread
   useEffect(() => {
     if (!isInProximity) return;
 
@@ -136,10 +142,12 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
     const framesCount = isMobile ? 120 : 240;
     const folder = isMobile ? "/sequence-jil-mobile" : "/sequence-jil";
     const loadedImages: (HTMLImageElement | null)[] = new Array(framesCount).fill(null);
+    imagesRef.current = loadedImages;
 
     let loadedCount = 0;
 
-    for (let i = 0; i < framesCount; i++) {
+    const loadFrame = (i: number) => {
+      if (i >= framesCount || !mounted) return;
       const img = new Image();
       img.src = `${folder}/frame_${i}.webp`;
 
@@ -147,9 +155,7 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
         if (!mounted) return;
         loadedImages[i] = img;
         loadedCount++;
-        // Update images state progressively as frames arrive
-        if (loadedCount % 5 === 0 || loadedCount === framesCount) {
-          setImages([...loadedImages]);
+        if (loadedCount >= INITIAL_BATCH && !isLoaded) {
           setIsLoaded(true);
         }
       };
@@ -157,11 +163,41 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
       img.onerror = () => {
         if (!mounted) return;
         loadedCount++;
-        if (loadedCount === framesCount) {
-          setImages([...loadedImages]);
+        if (loadedCount >= INITIAL_BATCH && !isLoaded) {
           setIsLoaded(true);
         }
       };
+    };
+
+    // 1. Rapid load initial batch for instant section start
+    for (let i = 0; i < INITIAL_BATCH; i++) {
+      loadFrame(i);
+    }
+
+    // 2. Stream remaining frames in idle time
+    let currentBatch = INITIAL_BATCH;
+    const BATCH_SIZE = 12;
+
+    const streamRemaining = () => {
+      if (!mounted || currentBatch >= framesCount) return;
+      const end = Math.min(currentBatch + BATCH_SIZE, framesCount);
+      for (let i = currentBatch; i < end; i++) {
+        loadFrame(i);
+      }
+      currentBatch = end;
+      if (currentBatch < framesCount) {
+        if (typeof window.requestIdleCallback === "function") {
+          window.requestIdleCallback(streamRemaining, { timeout: 100 });
+        } else {
+          setTimeout(streamRemaining, 25);
+        }
+      }
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(streamRemaining, { timeout: 100 });
+    } else {
+      setTimeout(streamRemaining, 40);
     }
 
     return () => {
@@ -200,27 +236,43 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
     };
   }, []);
 
-  // Draw JIL frame on canvas upon smoothProgress change
+  // Optimized Canvas render loop with dirty checking & cached radial gradient
   useEffect(() => {
-    if (!isLoaded || images.length === 0) return;
+    if (!isLoaded) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
     let animationFrameId: number;
     const totalFramesCount = isMobile ? 120 : 240;
+    let cachedRadialGradient: CanvasGradient | null = null;
+    let cachedGradW = 0;
+    let cachedGradH = 0;
 
     const render = () => {
       const currentProgress = smoothProgress.get();
-      // Target frame index scaled across all 240 (or 120 mobile) frames
       const targetIndex = Math.min(
         totalFramesCount - 1,
         Math.max(0, Math.floor(currentProgress * totalFramesCount))
       );
 
-      // Graceful fallback to nearest available loaded frame
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+
+      const sizeChanged =
+        lastCanvasSizeRef.current.w !== width ||
+        lastCanvasSizeRef.current.h !== height;
+
+      // DIRTY CHECKING: Skip redraw if frame index and canvas dimensions haven't changed!
+      if (!sizeChanged && lastRenderedIndexRef.current === targetIndex) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
+
+      const images = imagesRef.current;
       let img = images[targetIndex];
       if (!img) {
         for (let offset = 1; offset < totalFramesCount; offset++) {
@@ -235,44 +287,39 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
         }
       }
 
-      if (img && img.complete && img.naturalWidth > 0) {
-        const dpr = window.devicePixelRatio || 1;
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
+      if (img && img.complete && img.naturalWidth > 0 && width > 0 && height > 0) {
+        if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+        }
 
-        if (width > 0 && height > 0) {
-          if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-          }
+        ctx.save();
+        ctx.scale(dpr, dpr);
+        ctx.fillStyle = "#0A0A0A";
+        ctx.fillRect(0, 0, width, height);
 
-          ctx.save();
-          ctx.scale(dpr, dpr);
-          ctx.fillStyle = "#0A0A0A";
-          ctx.fillRect(0, 0, width, height);
+        const imgRatio = img.naturalWidth / img.naturalHeight;
+        const canvasRatio = width / height;
 
-          // Aspect ratio contain scaling (Preserves 16:9 laptop geometry perfectly on all device viewports)
-          const imgRatio = img.naturalWidth / img.naturalHeight;
-          const canvasRatio = width / height;
+        let drawWidth: number;
+        let drawHeight: number;
 
-          let drawWidth: number;
-          let drawHeight: number;
+        if (canvasRatio > imgRatio) {
+          drawHeight = height;
+          drawWidth = height * imgRatio;
+        } else {
+          drawWidth = width;
+          drawHeight = width / imgRatio;
+        }
 
-          if (canvasRatio > imgRatio) {
-            drawHeight = height;
-            drawWidth = height * imgRatio;
-          } else {
-            drawWidth = width;
-            drawHeight = width / imgRatio;
-          }
+        const drawX = (width - drawWidth) / 2;
+        const drawY = (height - drawHeight) / 2;
 
-          const drawX = (width - drawWidth) / 2;
-          const drawY = (height - drawHeight) / 2;
+        ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
 
-          ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-
-          // Radial edge blending overlay for seamless #0A0A0A integration
-          const radialGradient = ctx.createRadialGradient(
+        // Cache radial gradient to prevent GC pauses
+        if (!cachedRadialGradient || cachedGradW !== width || cachedGradH !== height) {
+          cachedRadialGradient = ctx.createRadialGradient(
             width / 2,
             height / 2,
             Math.min(drawWidth, drawHeight) * 0.4,
@@ -280,13 +327,20 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
             height / 2,
             Math.max(width, height) * 0.6
           );
-          radialGradient.addColorStop(0, "rgba(10, 10, 10, 0)");
-          radialGradient.addColorStop(1, "#0A0A0A");
-          ctx.fillStyle = radialGradient;
-          ctx.fillRect(0, 0, width, height);
-
-          ctx.restore();
+          cachedRadialGradient.addColorStop(0, "rgba(10, 10, 10, 0)");
+          cachedRadialGradient.addColorStop(1, "#0A0A0A");
+          cachedGradW = width;
+          cachedGradH = height;
         }
+
+        ctx.fillStyle = cachedRadialGradient;
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.restore();
+
+        // Save last rendered state
+        lastRenderedIndexRef.current = targetIndex;
+        lastCanvasSizeRef.current = { w: width, h: height };
       }
 
       animationFrameId = requestAnimationFrame(render);
@@ -297,7 +351,7 @@ export default function RecentMoves({ onOpenContact }: RecentMovesProps) {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isLoaded, images, smoothProgress, isMobile]);
+  }, [isLoaded, smoothProgress, isMobile]);
 
   // Framer Motion transforms for the 4 narrative beats in Recent Moves
   // Beat 1: 0.00 -> 0.25 (NEXUS)
